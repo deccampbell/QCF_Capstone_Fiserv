@@ -1,0 +1,95 @@
+macro fetch 2026-09-20 15:04
+
+fetching 39 FRED series ...
+  batch failed (Unable to read URL: https://fred.stlouisfed.org/graph/fredgraph.csv?id=CUUR0000SA0)
+  falling back to per-series fetch ...
+  ok   CPIAUCSL         -> cpi_sa                   n=  139  last=2026-08-01  [csv]
+  ok   CPIAUCNS         -> cpi_nsa                  n=  139  last=2026-08-01  [csv]
+  ok   CPILFESL         -> core_cpi_sa              n=  139  last=2026-08-01  [csv]
+  ok   PCEPI            -> pce_price_idx            n=  139  last=2026-07-01  [csv]
+  ok   PCEPILFE         -> core_pce_price_idx       n=  139  last=2026-07-01  [csv]
+  ok   CUSR0000SEFV     -> cpi_food_away_sa         n=  139  last=2026-08-01  [csv]
+  ok   CUSR0000SETB01   -> cpi_gasoline_sa          n=  140  last=2026-08-01  [csv]
+  ok   CUSR0000SAF11    -> cpi_food_at_home_sa      n=  139  last=2026-08-01  [csv]
+  ok   CUSR0000SAH1     -> cpi_shelter_sa           n=  139  last=2026-08-01  [csv]
+  ok   CPIAPPSL         -> cpi_apparel_sa           n=  139  last=2026-08-01  [csv]
+  ok   CUSR0000SETA02   -> cpi_used_vehicles_sa     n=  140  last=2026-08-01  [csv]
+  FAIL CUUR0000SA0      (cpi_all_nsa) - no working id found, skipping
+  ok   CUUR0000SEFV     -> cpi_food_away_nsa        n=  139  last=2026-08-01  [csv]
+  ok   CUUR0000SETB01   -> cpi_gasoline_nsa         n=  140  last=2026-08-01  [csv]
+  ok   CUUR0000SAF11    -> cpi_food_at_home_nsa     n=  139  last=2026-08-01  [csv]
+  ok   RSAFS            -> retail_sales_sa          n=  140  last=2026-08-01  [csv]
+  ok   RSAFSNA          -> retail_sales_nsa         n=  140  last=2026-08-01  [csv]
+  ok   RSFSXMV          -> retail_sales_ex_auto_sa  n=  140  last=2026-08-01  [csv]
+  ok   RRSFS            -> real_retail_food_sales   n=  139  last=2026-08-01  [csv]
+  ok   PCE              -> pce_nominal              n=  139  last=2026-07-01  [csv]
+  ok   PCEC96           -> real_pce                 n=  139  last=2026-07-01  [csv]
+  ok   PCEDG            -> pce_durable_goods        n=  139  last=2026-07-01  [csv]
+  ok   PCEND            -> pce_nondurable_goods     n=  139  last=2026-07-01  [csv]
+  ok   PCES             -> pce_services             n=  139  last=2026-07-01  [csv]
+  ok   DSPIC96          -> real_disposable_income   n=  139  last=2026-07-01  [csv]
+  ok   PSAVERT          -> savings_rate             n=  139  last=2026-07-01  [csv]
+  ok   UNRATE           -> unemployment             n=  139  last=2026-08-01  [csv]
+  ok   PAYEMS           -> nonfarm_payrolls         n=  140  last=2026-08-01  [csv]
+  ok   FEDFUNDS         -> fed_funds                n=  140  last=2026-08-01  [csv]
+  ok   DGS2             -> treasury_2y              n= 2929  last=2026-09-17  [csv]
+  ok   DGS10            -> treasury_10y             n= 2929  last=2026-09-17  [csv]
+  ok   T10YIE           -> breakeven_10y            n= 2930  last=2026-09-18  [csv]
+  ok   UMCSENT          -> consumer_sentiment       n=  139  last=2026-07-01  [csv]
+  ok   MICH             -> inflation_expect_1y      n=  139  last=2026-07-01  [csv]
+  ok   VIXCLS           -> vix                      n= 2977  last=2026-09-17  [csv]
+  ok   DTWEXBGS         -> dollar_index             n= 2916  last=2026-09-11  [csv]
+  ok   DCOILWTICO       -> wti_oil                  n= 2921  last=2026-09-15  [csv]
+  ok   BUSLOANS         -> commercial_loans         n=  140  last=2026-08-01  [csv]
+  ok   DRCCLACBS        -> cc_delinquency_rate      n=   46  last=2026-04-01  [csv]
+
+  1 series skipped: ['CUUR0000SA0']
+  Send me the list and I'll find replacements. The rest is usable.
+
+wrote macro_out/macro_panel.csv  shape=(141, 38)
+BEA: ok, 4309 rows, 31 lines
+wrote macro_out/bea_pce.csv
+
+coverage:
+  cpi_sa                   2015-01-01 .. 2026-08-01  n=139
+  cpi_nsa                  2015-01-01 .. 2026-08-01  n=139
+  core_cpi_sa              2015-01-01 .. 2026-08-01  n=139
+  pce_price_idx            2015-01-01 .. 2026-07-01  n=139
+  core_pce_price_idx       2015-01-01 .. 2026-07-01  n=139
+  cpi_food_away_sa         2015-01-01 .. 2026-08-01  n=139
+  cpi_gasoline_sa          2015-01-01 .. 2026-08-01  n=140
+  cpi_food_at_home_sa      2015-01-01 .. 2026-08-01  n=139
+  cpi_shelter_sa           2015-01-01 .. 2026-08-01  n=139
+  cpi_apparel_sa           2015-01-01 .. 2026-08-01  n=139
+  cpi_used_vehicles_sa     2015-01-01 .. 2026-08-01  n=140
+  cpi_all_nsa              MISSING
+  cpi_food_away_nsa        2015-01-01 .. 2026-08-01  n=139
+  cpi_gasoline_nsa         2015-01-01 .. 2026-08-01  n=140
+  cpi_food_at_home_nsa     2015-01-01 .. 2026-08-01  n=139
+  retail_sales_sa          2015-01-01 .. 2026-08-01  n=140
+  retail_sales_nsa         2015-01-01 .. 2026-08-01  n=140
+  retail_sales_ex_auto_sa  2015-01-01 .. 2026-08-01  n=140
+  real_retail_food_sales   2015-01-01 .. 2026-08-01  n=139
+  pce_nominal              2015-01-01 .. 2026-07-01  n=139
+  real_pce                 2015-01-01 .. 2026-07-01  n=139
+  pce_durable_goods        2015-01-01 .. 2026-07-01  n=139
+  pce_nondurable_goods     2015-01-01 .. 2026-07-01  n=139
+  pce_services             2015-01-01 .. 2026-07-01  n=139
+  real_disposable_income   2015-01-01 .. 2026-07-01  n=139
+  savings_rate             2015-01-01 .. 2026-07-01  n=139
+  unemployment             2015-01-01 .. 2026-08-01  n=139
+  nonfarm_payrolls         2015-01-01 .. 2026-08-01  n=140
+  fed_funds                2015-01-01 .. 2026-08-01  n=140
+  treasury_2y              2015-01-01 .. 2026-09-01  n=141
+  treasury_10y             2015-01-01 .. 2026-09-01  n=141
+  breakeven_10y            2015-01-01 .. 2026-09-01  n=141
+  consumer_sentiment       2015-01-01 .. 2026-07-01  n=139
+  inflation_expect_1y      2015-01-01 .. 2026-07-01  n=139
+  vix                      2015-01-01 .. 2026-09-01  n=141
+  dollar_index             2015-01-01 .. 2026-09-01  n=141
+  wti_oil                  2015-01-01 .. 2026-09-01  n=141
+  commercial_loans         2015-01-01 .. 2026-08-01  n=140
+  cc_delinquency_rate      2015-01-01 .. 2026-04-01  n=46
+
+1 series came back empty: ['cpi_all_nsa']
+Not necessarily a problem - tell me which and I'll adjust.
