@@ -13,3 +13,9 @@ Place them in `data/` before running any notebooks:
 If you need to re-download from source: https://fsbi.fiservapps.com  
 (Get Data → Select specific data (but then select all data types) → Jan 2019 to latest →  
 both SA and NSA checked → two downloads, Inflation Adjusted off then on)
+
+Teams from previous cohorts have provided their deliverables.
+Their GitHub repos are linked below.
+
+https://github.gatech.edu/kpang30/Fiserv-Team-2
+https://github.com/parkeross/Team_3_Fiserv
