@@ -1,209 +1,71 @@
-column,n_obs,first
-fsbi_sales_sa,92,2019-01-01
-fsbi_txn_sa,92,2019-01-01
-fsbi_sales_nsa,92,2019-01-01
-fsbi_txn_nsa,92,2019-01-01
-fsbi_ticket_sa,92,2019-01-01
-fsbi_ticket_nsa,92,2019-01-01
-cpi_sa,92,2019-01-01
-cpi_nsa,92,2019-01-01
-core_cpi_sa,92,2019-01-01
-pce_price,91,2019-01-01
-core_pce_price,91,2019-01-01
-cpi_food_away,92,2019-01-01
-cpi_gasoline,92,2019-01-01
-cpi_food_home,92,2019-01-01
-cpi_shelter,92,2019-01-01
-cpi_apparel,92,2019-01-01
-cpi_used_cars,92,2019-01-01
-retail_sa,92,2019-01-01
-retail_nsa,92,2019-01-01
-retail_ex_auto,92,2019-01-01
-pce,91,2019-01-01
-real_pce,91,2019-01-01
-pce_durables,91,2019-01-01
-pce_nondurables,91,2019-01-01
-pce_services,91,2019-01-01
-real_income,91,2019-01-01
-savings_rate,91,2019-01-01
-unemployment,92,2019-01-01
-payrolls,92,2019-01-01
-fed_funds,92,2019-01-01
-treasury_2y,92,2019-01-01
-treasury_10y,92,2019-01-01
-breakeven_10y,92,2019-01-01
-sentiment,91,2019-01-01
-inflation_expect,91,2019-01-01
-vix,92,2019-01-01
-dollar,92,2019-01-01
-oil,92,2019-01-01
-dgs3mo,92,2019-01-01
-dgs5,92,2019-01-01
-houst,92,2019-01-01
-indpro,92,2019-01-01
-payems,92,2019-01-01
-wtisplc,92,2019-01-01
-umcsent,91,2019-01-01
-dgs5_minus_dgs3mo,92,2019-01-01
-fsbi_sales_sa_mom,91,2019-02-01
-fsbi_txn_sa_mom,91,2019-02-01
-fsbi_sales_nsa_mom,91,2019-02-01
-fsbi_txn_nsa_mom,91,2019-02-01
-fsbi_ticket_sa_mom,91,2019-02-01
-fsbi_ticket_nsa_mom,91,2019-02-01
-cpi_sa_mom,91,2019-02-01
-cpi_nsa_mom,91,2019-02-01
-core_cpi_sa_mom,91,2019-02-01
-pce_price_mom,90,2019-02-01
-core_pce_price_mom,90,2019-02-01
-cpi_food_away_mom,91,2019-02-01
-cpi_gasoline_mom,91,2019-02-01
-cpi_food_home_mom,91,2019-02-01
-cpi_shelter_mom,91,2019-02-01
-cpi_apparel_mom,91,2019-02-01
-cpi_used_cars_mom,91,2019-02-01
-retail_sa_mom,91,2019-02-01
-retail_nsa_mom,91,2019-02-01
-retail_ex_auto_mom,91,2019-02-01
-pce_mom,90,2019-02-01
-real_pce_mom,90,2019-02-01
-pce_durables_mom,90,2019-02-01
-pce_nondurables_mom,90,2019-02-01
-pce_services_mom,90,2019-02-01
-real_income_mom,90,2019-02-01
-payrolls_mom,91,2019-02-01
-sentiment_mom,90,2019-02-01
-dollar_mom,91,2019-02-01
-oil_mom,91,2019-02-01
-houst_mom,91,2019-02-01
-indpro_mom,91,2019-02-01
-payems_mom,91,2019-02-01
-wtisplc_mom,91,2019-02-01
-umcsent_mom,90,2019-02-01
-fsbi_sales_sa_yoy,80,2020-01-01
-fsbi_txn_sa_yoy,80,2020-01-01
-fsbi_sales_nsa_yoy,80,2020-01-01
-fsbi_txn_nsa_yoy,80,2020-01-01
-fsbi_ticket_sa_yoy,80,2020-01-01
-fsbi_ticket_nsa_yoy,80,2020-01-01
-cpi_sa_yoy,80,2020-01-01
-cpi_nsa_yoy,80,2020-01-01
-core_cpi_sa_yoy,80,2020-01-01
-pce_price_yoy,79,2020-01-01
-core_pce_price_yoy,79,2020-01-01
-cpi_food_away_yoy,80,2020-01-01
-cpi_gasoline_yoy,80,2020-01-01
-cpi_food_home_yoy,80,2020-01-01
-cpi_shelter_yoy,80,2020-01-01
-cpi_apparel_yoy,80,2020-01-01
-cpi_used_cars_yoy,80,2020-01-01
-retail_sa_yoy,80,2020-01-01
-retail_nsa_yoy,80,2020-01-01
-retail_ex_auto_yoy,80,2020-01-01
-pce_yoy,79,2020-01-01
-real_pce_yoy,79,2020-01-01
-pce_durables_yoy,79,2020-01-01
-pce_nondurables_yoy,79,2020-01-01
-pce_services_yoy,79,2020-01-01
-real_income_yoy,79,2020-01-01
-payrolls_yoy,80,2020-01-01
-sentiment_yoy,79,2020-01-01
-dollar_yoy,80,2020-01-01
-oil_yoy,80,2020-01-01
-houst_yoy,80,2020-01-01
-indpro_yoy,80,2020-01-01
-payems_yoy,80,2020-01-01
-wtisplc_yoy,80,2020-01-01
-umcsent_yoy,79,2020-01-01
-fed_funds_mom,91,2019-02-01
-treasury_2y_mom,91,2019-02-01
-treasury_10y_mom,91,2019-02-01
-breakeven_10y_mom,91,2019-02-01
-savings_rate_mom,90,2019-02-01
-unemployment_mom,91,2019-02-01
-inflation_expect_mom,90,2019-02-01
-vix_mom,91,2019-02-01
-dgs3mo_mom,91,2019-02-01
-dgs5_mom,91,2019-02-01
-dgs5_minus_dgs3mo_mom,91,2019-02-01
-fed_funds_yoy,80,2020-01-01
-treasury_2y_yoy,80,2020-01-01
-treasury_10y_yoy,80,2020-01-01
-breakeven_10y_yoy,80,2020-01-01
-savings_rate_yoy,79,2020-01-01
-unemployment_yoy,80,2020-01-01
-inflation_expect_yoy,79,2020-01-01
-vix_yoy,80,2020-01-01
-dgs3mo_yoy,80,2020-01-01
-dgs5_yoy,80,2020-01-01
-dgs5_minus_dgs3mo_yoy,80,2020-01-01
-fsbi_sales_sa_yoy_ma3,78,2020-03-01
-fsbi_ticket_sa_yoy_ma3,78,2020-03-01
-fsbi_txn_sa_yoy_ma3,78,2020-03-01
-retail_sa_yoy_ma3,78,2020-03-01
-cpi_sa_yoy_ma3,78,2020-03-01
-fsbi_sales_sa_yoy_ma6,75,2020-06-01
-fsbi_ticket_sa_yoy_ma6,75,2020-06-01
-fsbi_txn_sa_yoy_ma6,75,2020-06-01
-retail_sa_yoy_ma6,75,2020-06-01
-cpi_sa_yoy_ma6,75,2020-06-01
-fsbi_sales_sa_mom_lag1,90,2019-03-01
-fsbi_txn_sa_mom_lag1,90,2019-03-01
-fsbi_sales_nsa_mom_lag1,90,2019-03-01
-fsbi_txn_nsa_mom_lag1,90,2019-03-01
-fsbi_ticket_sa_mom_lag1,90,2019-03-01
-fsbi_ticket_nsa_mom_lag1,90,2019-03-01
-fsbi_sales_sa_yoy_lag1,79,2020-02-01
-fsbi_txn_sa_yoy_lag1,79,2020-02-01
-fsbi_sales_nsa_yoy_lag1,79,2020-02-01
-fsbi_txn_nsa_yoy_lag1,79,2020-02-01
-fsbi_ticket_sa_yoy_lag1,79,2020-02-01
-fsbi_ticket_nsa_yoy_lag1,79,2020-02-01
-fsbi_sales_sa_mom_lag2,89,2019-04-01
-fsbi_txn_sa_mom_lag2,89,2019-04-01
-fsbi_sales_nsa_mom_lag2,89,2019-04-01
-fsbi_txn_nsa_mom_lag2,89,2019-04-01
-fsbi_ticket_sa_mom_lag2,89,2019-04-01
-fsbi_ticket_nsa_mom_lag2,89,2019-04-01
-fsbi_sales_sa_yoy_lag2,78,2020-03-01
-fsbi_txn_sa_yoy_lag2,78,2020-03-01
-fsbi_sales_nsa_yoy_lag2,78,2020-03-01
-fsbi_txn_nsa_yoy_lag2,78,2020-03-01
-fsbi_ticket_sa_yoy_lag2,78,2020-03-01
-fsbi_ticket_nsa_yoy_lag2,78,2020-03-01
-fsbi_sales_sa_mom_lag3,88,2019-05-01
-fsbi_txn_sa_mom_lag3,88,2019-05-01
-fsbi_sales_nsa_mom_lag3,88,2019-05-01
-fsbi_txn_nsa_mom_lag3,88,2019-05-01
-fsbi_ticket_sa_mom_lag3,88,2019-05-01
-fsbi_ticket_nsa_mom_lag3,88,2019-05-01
-fsbi_sales_sa_yoy_lag3,77,2020-04-01
-fsbi_txn_sa_yoy_lag3,77,2020-04-01
-fsbi_sales_nsa_yoy_lag3,77,2020-04-01
-fsbi_txn_nsa_yoy_lag3,77,2020-04-01
-fsbi_ticket_sa_yoy_lag3,77,2020-04-01
-fsbi_ticket_nsa_yoy_lag3,77,2020-04-01
-fsbi_sales_sa_mom_lag6,85,2019-08-01
-fsbi_txn_sa_mom_lag6,85,2019-08-01
-fsbi_sales_nsa_mom_lag6,85,2019-08-01
-fsbi_txn_nsa_mom_lag6,85,2019-08-01
-fsbi_ticket_sa_mom_lag6,85,2019-08-01
-fsbi_ticket_nsa_mom_lag6,85,2019-08-01
-fsbi_sales_sa_yoy_lag6,74,2020-07-01
-fsbi_txn_sa_yoy_lag6,74,2020-07-01
-fsbi_sales_nsa_yoy_lag6,74,2020-07-01
-fsbi_txn_nsa_yoy_lag6,74,2020-07-01
-fsbi_ticket_sa_yoy_lag6,74,2020-07-01
-fsbi_ticket_nsa_yoy_lag6,74,2020-07-01
-fsbi_sales_sa_mom_lag12,79,2020-02-01
-fsbi_txn_sa_mom_lag12,79,2020-02-01
-fsbi_sales_nsa_mom_lag12,79,2020-02-01
-fsbi_txn_nsa_mom_lag12,79,2020-02-01
-fsbi_ticket_sa_mom_lag12,79,2020-02-01
-fsbi_ticket_nsa_mom_lag12,79,2020-02-01
-fsbi_sales_sa_yoy_lag12,68,2021-01-01
-fsbi_txn_sa_yoy_lag12,68,2021-01-01
-fsbi_sales_nsa_yoy_lag12,68,2021-01-01
-fsbi_txn_nsa_yoy_lag12,68,2021-01-01
-fsbi_ticket_sa_yoy_lag12,68,2021-01-01
-fsbi_ticket_nsa_yoy_lag12,68,2021-01-01
+column,source,base_series,transformation,breadth_universe,n_obs,first,last,monthly_aggregation,fred_retrieved_at_utc,availability
+fsbi_sales_sa,Data_Nominal.csv,fsbi_sales_sa,level,,92,2019-01-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_txn_sa,Data_Nominal.csv,fsbi_txn_sa,level,,92,2019-01-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_sales_nsa,Data_Nominal.csv,fsbi_sales_nsa,level,,92,2019-01-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_txn_nsa,Data_Nominal.csv,fsbi_txn_nsa,level,,92,2019-01-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_ticket_index_sa,Data_Nominal.csv,fsbi_ticket_index_sa,sales index / transaction index * 100; level,,92,2019-01-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_ticket_index_nsa,Data_Nominal.csv,fsbi_ticket_index_nsa,sales index / transaction index * 100; level,,92,2019-01-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_sector_sales_breadth,Data_Nominal.csv,fsbi_sector_sales_breadth,share with positive monthly SA growth; full fixed-universe coverage required,"Accommodation and Food Services; Administrative and Support and Waste Management and Remediation Services; Arts, Entertainment, and Recreation; Construction; Educational Services; Health Care and Social Assistance; Information; Other Services (except Public Administration); Professional, Scientific, and Technical Services; Real Estate and Rental and Leasing; Retail Trade; Transportation and Warehousing; Wholesale Trade (Motor Vehicle and Motor Vehicle Parts, Metal and Mineral, Household Appliances and Electrical and Electronic Goods, Durable Goods)",84,2019-02-01,2026-08-01,equal-weight category share,,reference month; historical availability not reconstructed
+fsbi_sector_ticket_breadth,Data_Nominal.csv,fsbi_sector_ticket_breadth,share with positive monthly SA growth; full fixed-universe coverage required,"Accommodation and Food Services; Administrative and Support and Waste Management and Remediation Services; Arts, Entertainment, and Recreation; Construction; Educational Services; Health Care and Social Assistance; Information; Other Services (except Public Administration); Professional, Scientific, and Technical Services; Real Estate and Rental and Leasing; Retail Trade; Transportation and Warehousing; Wholesale Trade (Motor Vehicle and Motor Vehicle Parts, Metal and Mineral, Household Appliances and Electrical and Electronic Goods, Durable Goods)",84,2019-02-01,2026-08-01,equal-weight category share,,reference month; historical availability not reconstructed
+fsbi_state_sales_breadth,Data_Nominal.csv,fsbi_state_sales_breadth,share with positive monthly SA growth; full fixed-universe coverage required,AL; AK; AZ; AR; CA; CO; CT; DE; FL; GA; HI; ID; IL; IN; IA; KS; KY; LA; ME; MD; MA; MI; MN; MS; MO; MT; NE; NV; NH; NJ; NM; NY; NC; ND; OH; OK; OR; PA; RI; SC; SD; TN; TX; UT; VT; VA; WA; WV; WI; WY,91,2019-02-01,2026-08-01,equal-weight category share,,reference month; historical availability not reconstructed
+cpi_sa,CPIAUCSL,cpi_sa,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_nsa,CPIAUCNS,cpi_nsa,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+core_cpi_sa,CPILFESL,core_cpi_sa,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+pce_price,PCEPI,pce_price,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+core_pce_price,PCEPILFE,core_pce_price,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_food_away,CUSR0000SEFV,cpi_food_away,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_gasoline,CUSR0000SETB01,cpi_gasoline,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_food_home,CUSR0000SAF11,cpi_food_home,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_shelter,CUSR0000SAH1,cpi_shelter,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_apparel,CPIAPPSL,cpi_apparel,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+cpi_used_cars,CUSR0000SETA02,cpi_used_cars,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+retail_sa,RSAFS,retail_sa,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+retail_nsa,RSAFSNA,retail_nsa,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+retail_ex_auto,RSFSXMV,retail_ex_auto,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+pce,PCE,pce,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+real_pce,PCEC96,real_pce,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+pce_durables,PCEDG,pce_durables,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+pce_nondurables,PCEND,pce_nondurables,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+pce_services,PCES,pce_services,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+real_income,DSPIC96,real_income,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+savings_rate,PSAVERT,savings_rate,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+unemployment,UNRATE,unemployment,level,,91,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+payrolls,PAYEMS,payrolls,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+fed_funds,FEDFUNDS,fed_funds,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+treasury_2y,DGS2,treasury_2y,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+treasury_10y,DGS10,treasury_10y,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+breakeven_10y,T10YIE,breakeven_10y,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+sentiment,UMCSENT,sentiment,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+inflation_expect,MICH,inflation_expect,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+vix,VIXCLS,vix,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+dollar,DTWEXBGS,dollar,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+oil,WTISPLC,oil,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+dgs5,DGS5,dgs5,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+dgs3mo,DGS3MO,dgs3mo,level,,92,2019-01-01,2026-08-01,mean of daily observations,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+industrial_production,INDPRO,industrial_production,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+housing_starts,HOUST,housing_starts,level,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+dgs5_minus_dgs3mo,DGS5 - DGS3MO,dgs5_minus_dgs3mo,level,,92,2019-01-01,2026-08-01,difference of monthly mean yields,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+fsbi_sales_sa_log_mom,Data_Nominal.csv,fsbi_sales_sa,log_mom,,91,2019-02-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_txn_sa_log_mom,Data_Nominal.csv,fsbi_txn_sa,log_mom,,91,2019-02-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+fsbi_ticket_index_sa_log_mom,Data_Nominal.csv,fsbi_ticket_index_sa,sales index / transaction index * 100; log_mom,,91,2019-02-01,2026-08-01,reported monthly observation,,reference month; historical availability not reconstructed
+cpi_sa_pct_mom,CPIAUCSL,cpi_sa,pct_mom,,90,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+core_cpi_sa_pct_mom,CPILFESL,core_cpi_sa,pct_mom,,90,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+core_pce_price_pct_mom,PCEPILFE,core_pce_price,pct_mom,,92,2019-01-01,2026-08-01,reported monthly observation,2026-10-02T15:01:56.838506+00:00,reference month; historical availability not reconstructed
+clev_cpi_nowcast_fsbi,Cleveland Fed nowcast_month.json,clev_cpi_nowcast_fsbi,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_cpi_nowcast_fsbi,Cleveland Fed nowcast_month.json,clev_core_cpi_nowcast_fsbi,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_pce_nowcast_fsbi,Cleveland Fed nowcast_month.json,clev_core_pce_nowcast_fsbi,level,,92,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_cpi_nowcast_final,Cleveland Fed nowcast_month.json,clev_cpi_nowcast_final,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_cpi_nowcast_final,Cleveland Fed nowcast_month.json,clev_core_cpi_nowcast_final,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_pce_nowcast_final,Cleveland Fed nowcast_month.json,clev_core_pce_nowcast_final,level,,92,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_cpi_first_print,Cleveland Fed nowcast_month.json,clev_cpi_first_print,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_cpi_first_print,Cleveland Fed nowcast_month.json,clev_core_cpi_first_print,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_pce_first_print,Cleveland Fed nowcast_month.json,clev_core_pce_first_print,level,,92,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_cpi_release,Cleveland Fed nowcast_month.json,clev_cpi_release,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_cpi_release,Cleveland Fed nowcast_month.json,clev_core_cpi_release,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_pce_release,Cleveland Fed nowcast_month.json,clev_core_pce_release,level,,92,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_cpi_surprise,Cleveland Fed nowcast_month.json,clev_cpi_surprise,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_cpi_surprise,Cleveland Fed nowcast_month.json,clev_core_cpi_surprise,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_pce_surprise,Cleveland Fed nowcast_month.json,clev_core_pce_surprise,level,,92,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_cpi_surprise_final,Cleveland Fed nowcast_month.json,clev_cpi_surprise_final,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_cpi_surprise_final,Cleveland Fed nowcast_month.json,clev_core_cpi_surprise_final,level,,91,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
+clev_core_pce_surprise_final,Cleveland Fed nowcast_month.json,clev_core_pce_surprise_final,level,,92,2019-01-01,2026-08-01,first release; nowcasts on the 6th of t+1 and last before release,,reference month; historical availability not reconstructed
