@@ -1,0 +1,5 @@
+Data/cache/
+Data/processed/
+.env
+.ipynb_checkpoints/
+__pycache__/

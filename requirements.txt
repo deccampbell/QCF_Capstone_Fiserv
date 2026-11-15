@@ -1,0 +1,15 @@
+numpy
+pandas
+scipy
+scikit-learn
+statsmodels
+matplotlib
+seaborn
+requests
+fredapi
+yfinance
+plotly
+streamlit
+xgboost
+nbformat
+jupyter
