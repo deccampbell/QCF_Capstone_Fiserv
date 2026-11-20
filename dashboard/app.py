@@ -19,7 +19,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
 
-st.set_page_config(page_title="FSBI Insights", page_icon="📈", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="FSBI Insights", layout="wide", initial_sidebar_state="expanded")
 HERE = Path(__file__).resolve().parent
 _cands = [os.environ.get("FSBI_DASH_DATA"), os.environ.get("FSBI_DASH_DIR"), HERE / "Data" / "processed" / "dashboard", HERE.parent / "Data" / "processed" / "dashboard",
           HERE / "processed" / "dashboard", HERE / "data" / "processed" / "dashboard", HERE / "data" / "dashboard", HERE.parent / "data" / "processed" / "dashboard", HERE.parent / "processed" / "dashboard"]
@@ -48,11 +48,16 @@ st.markdown("""<style>
   h3 {font-size: 1.1rem !important;}
   [data-testid="stMetricLabel"] p {font-size: 0.85rem; color: #4b5563;}
   [data-testid="stMetricValue"] {font-size: 1.55rem;}
+  .brand {font-size: 1.15rem; font-weight: 700; color: #1f2933; line-height: 1.3;}
+  .brand span {display: block; font-size: 0.82rem; font-weight: 400; color: #6b7280;}
   .subtitle {color: #6b7280; font-size: 1.0rem; margin: 0.15rem 0 1.0rem 0;}
-  .pill {display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; margin-right: 4px;}
+  .pill, .tag {display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; margin-right: 4px;}
   .pill-soon {background: #fff1e6; color: #c2410c;} .pill-later {background: #eef2f7; color: #1f4e79;} .pill-late {background: #fde8e8; color: #9b1c1c;}
+  .tag-sig {background: #e6f4ec; color: #2f855a;} .tag-desc {background: #eef2f7; color: #1f4e79;} .tag-none {background: #f1f2f4; color: #6b7280;}
   .card-title {font-weight: 700; font-size: 1.05rem;} .small {color: #6b7280; font-size: 0.85rem;}
-  .signal-row {padding: 6px 0; border-bottom: 1px solid #eef0f3;}
+  .signal-row {padding: 6px 0 6px 10px; border-bottom: 1px solid #eef0f3; border-left: 3px solid transparent;}
+  .selection {background: #f6f7f9; border: 1px solid #e5e7eb; border-radius: 6px; padding: 7px 12px; margin: 0.3rem 0 0.9rem 0; font-size: 0.88rem; color: #374151;}
+  .selection b {color: #1f2933;} .selection .k {color: #6b7280;}
 </style>""", unsafe_allow_html=True)
 
 GLOSSARY = {
@@ -71,8 +76,7 @@ GLOSSARY = {
     "Granger test": "Do past values of FSBI help predict a series beyond that series' own past? Run in both directions.",
     "IC": "Information coefficient: the rank correlation between a signal and the next period's returns across assets.",
 }
-PAGE_LABEL = {"0. Overview": "🏠  Overview", "1. FSBI explorer": "📊  FSBI explorer", "2. Inflation forecasts": "🎯  Inflation forecasts", "3. Trading strategies": "📈  Trading strategies",
-              "4. Economic applications": "🧭  Economic signals", "5. Signal lab": "🧪  Signal lab", "6. Findings": "📝  Findings"}
+PAGE_LABEL = {"1. FSBI explorer": "FSBI trends", "2. Inflation forecasts": "Inflation predictions", "3. Trading strategies": "Trading results", "4. Economic applications": "FSBI correlations"}
 HIST, NOWCAST, KALSHI, SELECTED = "First print (history)", "Cleveland nowcast", "Kalshi median", "Online-selected (with FSBI)"
 TARGETS = ["CPI", "core CPI", "PCE", "core PCE"]; KEY_OF = {"CPI": "cpi", "core CPI": "core_cpi", "PCE": "pce", "core PCE": "core_pce"}
 
@@ -100,7 +104,8 @@ def load(folder, stamp):
     d = {k: rd(v) for k, v in names.items()}
     for k, v in {"ablation": "ablation.csv", "anchor": "anchor_test.csv", "comp": "component_tests.csv", "regtest": "region_tests.csv", "risk": "risk.csv", "attrib": "attribution.csv",
                  "sens": "sensitivity.csv", "score": "scorecard.csv", "econ_nat": "econ_national.csv", "econ_sec": "econ_sector_sales.csv", "econ_state": "econ_state.csv",
-                 "econ_map": "econ_state_map.csv", "leads": "econ_leads.csv", "lead_prof": "econ_lead_profiles.csv", "sc_ic": "smallcap_ic.csv"}.items():
+                 "econ_map": "econ_state_map.csv", "leads": "econ_leads.csv", "lead_prof": "econ_lead_profiles.csv", "sc_ic": "smallcap_ic.csv",
+                 "reversals": "reversals.csv", "macro_reads": "macro_reads.csv", "event": "fsbi_event.csv", "fi_grid": "fixed_income_grid.csv", "macro_ind": "macro_indicators.csv"}.items():
         d[k] = rd(v, dates=())
     d["meta"] = json.loads((p / "meta.json").read_text())
     if len(d["fsbi"]):
@@ -133,15 +138,23 @@ fnum = lambda v, f="{:.2f}", na="–": na if v is None or (isinstance(v, float) 
 
 
 def empty_note(msg="Nothing to show for this selection. Widen the timeline in the sidebar or change the filters."):
-    st.info(msg, icon="ℹ️")
+    st.caption(msg)
 
 
 def header(title, subtitle):
     st.title(title); st.markdown(f"<div class='subtitle'>{subtitle}</div>", unsafe_allow_html=True)
 
 
-def how_to_read(text, label="How to read this"):
-    with st.expander(label, icon="💡"):
+def selection(**items):
+    """One line stating what the charts below are showing, built from the current widget values."""
+    parts = " &nbsp;·&nbsp; ".join(f"<span class='k'>{k.replace('_', ' ')}:</span> <b>{v}</b>" for k, v in items.items() if v not in (None, "", []))
+    st.markdown(f"<div class='selection'>Showing &nbsp; {parts}</div>", unsafe_allow_html=True)
+
+def short_list(xs, n=4):
+    xs = list(xs); return ", ".join(map(str, xs[:n])) + (f" +{len(xs) - n} more" if len(xs) > n else "")
+
+def how_to_read(text, label="Method"):
+    with st.expander(label):
         st.markdown(text)
 
 
@@ -171,19 +184,19 @@ def xs_weights(row, frac, min_n=4, long_only=False):
 def verdict(row):
     """Plain-language verdict for a leaderboard row."""
     if pd.notna(row.get("Holm p")) and row["Holm p"] < 0.10:
-        return "✅ Significant"
+        return "Significant"
     if pd.notna(row.get("bootstrap p")) and row["bootstrap p"] < 0.10 and row.get("Sharpe", 0) > 0:
-        return "🟡 Promising"
-    return "⚪ Inconclusive" if row.get("Sharpe", 0) > 0 else "🔻 Negative"
+        return "Promising"
+    return "Inconclusive" if row.get("Sharpe", 0) > 0 else "Negative"
 
 
 def evidence_dot(ev):
-    """🟢 at least one result that survives a significance test (placebo-only passes do not count), 🔵 descriptive, ⚪ none."""
+    """Tag: at least one result survives a significance test (placebo-only passes do not count), descriptive only, or none."""
     if "descriptive" in ev:
-        return "🔵"
+        return "<span class='tag tag-desc'>Descriptive</span>"
     counts = [int(m.group(1)) for m in re.finditer(r"(\d+)(?: of \d+)?(?: cells)? (?:significant|survive Holm|pass the reality check|with t >)", ev)]
     ps = [float(m.group(1)) for m in re.finditer(r"p = (\d*\.\d+)", ev)]
-    return "🟢" if any(c > 0 for c in counts) or any(p < 0.10 for p in ps) else "⚪"
+    return "<span class='tag tag-sig'>Significant</span>" if any(c > 0 for c in counts) or any(p < 0.10 for p in ps) else "<span class='tag tag-none'>Not significant</span>"
 
 
 def scorecard(sc):
@@ -191,18 +204,18 @@ def scorecard(sc):
     use_col = sc.columns[0]
     for _, r in sc.iterrows():
         ev = str(r.get("evidence", "")); dot = evidence_dot(ev)
-        st.markdown(f"<div class='signal-row'>{dot} <b>{r[use_col]}</b><br>{r.get('result', '')}<br><span class='small'>Evidence: {ev}</span></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='signal-row'><b>{r[use_col]}</b> {dot}<br>{r.get('result', '')}<br><span class='small'>Evidence: {ev}</span></div>", unsafe_allow_html=True)
 
 
 asset_name = lambda a: a.replace("basket:", "").replace("spread:", "").replace("banks:", "banks ")
 
 
 # ------------------------------------------------------------------ sidebar
-st.sidebar.markdown("## 📈 FSBI Insights")
-st.sidebar.caption("Fiserv small-business data → inflation, the economy and markets")
+st.sidebar.markdown("<div class='brand'>FSBI Insights<span>Fiserv Small Business Index: inflation, activity and markets</span></div>", unsafe_allow_html=True)
+st.sidebar.write("")
 page = st.sidebar.radio("Go to", list(PAGE_LABEL), format_func=PAGE_LABEL.get, key="page", label_visibility="collapsed")
 st.sidebar.divider()
-with st.sidebar.expander("⚙️ Advanced: data folder"):
+with st.sidebar.expander("Data folder"):
     folder = st.text_input("Folder written by the notebook", str(DEFAULT), key="folder")
 if not (Path(folder) / "fsbi.csv").exists() or not (Path(folder) / "meta.json").exists():
     st.error(f"No dashboard data found in `{folder}`. Run the notebook through its last cell (section 7), or set the folder under **Advanced** in the sidebar.")
@@ -236,9 +249,9 @@ def release_rows():
     order = ["fsbi", "cpi", "core_cpi", "pce", "core_pce", "retail_sales"]; out = []
     for key in [k for k in order if k in SCHED] + [k for k in SCHED if k not in order]:
         s_ = SCHED[key]
-        n_ = days_to(s_["release date"]); icon = "🔴" if n_ < 0 else "🟠" if n_ <= 7 else "🔵"
+        n_ = days_to(s_["release date"])
         out.append({"Release": s_["series"], "For": pd.Timestamp(s_["next month"]).strftime("%b %Y"), "Date": pd.Timestamp(s_["release date"]).strftime("%a %d %b %Y"),
-                    "Days left": n_, "When": f"{icon} {countdown(s_['release date'], fsbi=key == 'fsbi')}", "Source": s_.get("source", "")})
+                    "Days left": n_, "When": countdown(s_['release date'], fsbi=key == 'fsbi'), "Source": s_.get("source", "")})
     return pd.DataFrame(out)
 
 
@@ -254,11 +267,11 @@ start_m, end_m = st.sidebar.select_slider("Timeline", options=months, value=(mon
                                           help="Limits every time chart and every statistic computed in the dashboard to these months.")
 t0, t1 = pd.Timestamp(start_m), pd.Timestamp(end_m)
 POSITION = st.sidebar.number_input("Position size ($)", value=10000, step=1000, min_value=0, key="position", help="Used to express strategy results in dollars.")
-with st.sidebar.expander("📖 Glossary"):
+with st.sidebar.expander("Glossary"):
     for k_, v_ in GLOSSARY.items():
         st.markdown(f"**{k_}** · {v_}")
 if meta.get("stale_downloads"):
-    st.sidebar.warning(f"{len(meta['stale_downloads'])} downloads could not be refreshed on the last run and use older copies: {', '.join(meta['stale_downloads'][:6])}", icon="⚠️")
+    st.sidebar.warning(f"{len(meta['stale_downloads'])} downloads could not be refreshed on the last run and use older copies: {', '.join(meta['stale_downloads'][:6])}")
 st.sidebar.caption(f"Notebook run {meta['updated']} · {meta.get('fsbi_file', 'FSBI file')} dated {meta.get('fsbi_file_modified', '?')} · "
                    f"design period ends {DESIGN_END:%b %Y}. Research tool, not investment advice.")
 
@@ -288,64 +301,21 @@ def forecast_card(r, where, compact=False):
             st.markdown(f"<span class='small'>Year on year</span> **{r['forecast YoY']:.2f}%**", unsafe_allow_html=True)
         if len(pv):
             p_ = pv.iloc[0]; miss = p_["miss (print - forecast)"]
-            st.markdown(f"<span class='small'>Last month ({pd.Timestamp(p_['month']):%b}): printed <b>{p_['first print']:.2f}%</b> vs forecast {p_['forecast']:.2f}% → "
+            st.markdown(f"<span class='small'>Last month ({pd.Timestamp(p_['month']):%b}): printed <b>{p_['first print']:.2f}%</b> vs forecast {p_['forecast']:.2f}%, miss "
                         f"<b style='color:{RED if miss > 0 else NAVY}'>{miss:+.2f} pp</b></span>", unsafe_allow_html=True)
 
 
-# ================================================================== 0. overview
-if page.startswith("0"):
-    header(f"What's new: FSBI for {LIVE_M:%B %Y}", "The latest small-business reading, what it implies for inflation, and which signals are worth watching.")
-    F = D["fsbi"]; METRIC = {"Sales": "sales_index", "Transactions": "txn_index", "Ticket": "ticket_index"}
-    cols = st.columns(3)
-    for c, (lbl, col) in zip(cols, METRIC.items()):
-        s = with_measure(F[F.level == "National"], col, "YoY %").dropna(subset=["value"])
-        if len(s) >= 2:
-            c.metric(f"Small-business {lbl.lower()}, year on year", f"{s.value.iloc[-1]:+.1f}%", f"{s.value.iloc[-1] - s.value.iloc[-2]:+.1f} pp vs previous month",
-                     help={"Sales": "Card sales at small businesses.", "Transactions": "Number of card transactions: a volume measure.", "Ticket": "Sales ÷ transactions: the average purchase, a price-like measure."}[lbl])
-    st.subheader("Inflation forecasts")
-    if len(CUR):
-        cols = st.columns(len(CUR))
-        for c, (_, r) in zip(cols, CUR.iterrows()):
-            forecast_card(r, c)
-    else:
-        empty_note("No live forecast in this export.")
-    st.subheader("Release calendar")
-    if SCHED:
-        rr = release_rows()
-        st.dataframe(rr[["Release", "For", "Date", "Days left", "When"]], hide_index=True, key="release_table", **WIDE,
-                     column_config={"Release": st.column_config.TextColumn(width="medium"), "Days left": st.column_config.NumberColumn(format="%d", width="small"),
-                                    "When": st.column_config.TextColumn(width="large")})
-        st.caption("🟠 within a week · 🔵 later · 🔴 already out: rerun the notebook. Dates come from FRED's release calendar where available; the FSBI date is an estimate. "
-                   "CPI and core CPI share a release, as do PCE and core PCE.")
-    c2, c3 = st.columns([1, 1.25])
-    with c2:
-        st.subheader("What FSBI is saying now")
-        LS = meta.get("latest_signals", {})
-        if LS:
-            for name, v in LS.items():
-                if v is None:
-                    continue
-                arrow, tone = ("▲", ORANGE) if v > 0.5 else ("▼", NAVY) if v < -0.5 else ("●", MUTED)
-                word = "well above normal" if v > 1 else "above normal" if v > 0.5 else "well below normal" if v < -1 else "below normal" if v < -0.5 else "close to normal"
-                st.markdown(f"<div class='signal-row'><b style='color:{tone}'>{arrow}</b> {name.replace(' (z)', '')}: <b>{word}</b> <span class='small'>({v:+.1f} sd)</span></div>", unsafe_allow_html=True)
-            st.caption(f"Latest signal month {meta.get('latest_signal_month', '')}. 'sd' = standard deviations from that series' own history.")
-    LBD = D["lb"]
-    if has(LBD):
-        with c3:
-            st.subheader("Strategies worth watching")
-            for _, r in LBD.sort_values("Sharpe", ascending=False).head(4).iterrows():
-                live = f" · live {r['Sharpe (holdout)']:.2f}" if "Sharpe (holdout)" in r and pd.notna(r["Sharpe (holdout)"]) else ""
-                st.markdown(f"<div class='signal-row'><b>{r.strategy}</b><br><span class='small'>{r.family} · Sharpe {r.Sharpe:.2f}{live} · {verdict(r)}</span></div>", unsafe_allow_html=True)
-            st.caption("Ranked by design-period Sharpe. 'Significant' means it survives the correction for testing every strategy; with about four years of data most do not.")
-    sc = D["score"]
-    if has(sc):
-        with st.expander("Key findings (full scorecard on the Findings page)", expanded=False):
-            scorecard(sc.head(8))
-
 # ================================================================== 1. FSBI explorer
-elif page.startswith("1"):
-    header("FSBI explorer", "Small-business spending by sector, sub-sector, region and state. Pick a level and a measure; every chart follows the sidebar timeline.")
+if page.startswith("1"):
+    header("FSBI trends", f"Small-business sales, transactions and ticket through {LIVE_M:%B %Y}, by sector, sub-sector, region and state.")
     F = D["fsbi"]; METRIC = {"Sales": "sales_index", "Transactions": "txn_index", "Ticket (sales per transaction)": "ticket_index"}
+    hc = st.columns(6); nat_ = F[F.level == "National"]
+    for j, (lbl, col) in enumerate(METRIC.items()):
+        for q, (ms_, unit) in enumerate((("YoY %", "year on year"), ("MoM %", "month on month"))):
+            v_ = with_measure(nat_, col, ms_).dropna(subset=["value"])
+            if len(v_) >= 2:
+                hc[2 * j + q].metric(f"{lbl.split(' (')[0]}, {unit}", f"{v_.value.iloc[-1]:+.1f}%", f"{v_.value.iloc[-1] - v_.value.iloc[-2]:+.1f} pp", help="Change from the prior month's reading.")
+    st.caption(f"National index, {LIVE_M:%B %Y}. Sales: card spending. Transactions: number of purchases. Ticket: sales per transaction.")
     MEASURE_LABEL = {"Index": "Index level", "MoM %": "Month on month %", "YoY %": "Year on year %", "3-month annualised %": "3-month annualised %"}
     regions = list(meta["regions"]); sectors = sorted(F.loc[F.level == "Sector", "name"].unique()); subsectors = sorted(F.loc[F.level == "Subsector", "name"].unique())
     levels = [l for l in ["National", "Sector", "Subsector", "Region", "State", "Region x sector"] if (F.level == l).any()]
@@ -358,7 +328,9 @@ elif page.startswith("1"):
         sel_regions = c1.multiselect("Regions", regions, default=regions, key="p1_regions", disabled=level not in ("Region", "State", "Region x sector"))
         sel_sectors = c2.multiselect("Sectors", sectors, default=sectors[:5], key="p1_sectors", disabled=level not in ("Sector", "Region x sector"))
         sel_subs = c3.multiselect("Sub-sectors", subsectors, default=subsectors[:6], key="p1_subsectors", disabled=level != "Subsector")
-    tab_tr, tab_x, tab_reg = st.tabs(["📈 Trends", "🗺️ States and sectors", "⚖️ Inflation regime"])
+    names_ = {"Sector": sel_sectors, "Subsector": sel_subs, "Region": sel_regions, "State": sel_regions, "Region x sector": sel_sectors}.get(level)
+    selection(Level=level, Metric=metric.split(" (")[0], Measure=MEASURE_LABEL[measure], **({("Regions" if level in ("Region", "State") else "Series"): short_list(names_)} if names_ else {}), Period=f"{t0:%b %Y} to {t1:%b %Y}")
+    tab_tr, tab_x, tab_reg = st.tabs(["Trends", "States and sectors", "Inflation regime"])
     with tab_tr:
         sub = F[F.level == level]
         if level in ("Sector", "Region x sector"):
@@ -418,12 +390,12 @@ elif page.startswith("1"):
 
 # ================================================================== 2. inflation forecasts
 elif page.startswith("2"):
-    header("Inflation forecasts", "FSBI-based forecasts of CPI, core CPI, PCE and core PCE, checked against the Cleveland Fed nowcast and Kalshi.")
+    header("Inflation predictions", "First-print CPI, core CPI, PCE and core PCE forecasts from FSBI, against the Cleveland Fed nowcast and Kalshi.")
     I = D["inf"]; oos = I[I.model != HIST]
     c1, c2, c3 = st.columns([2, 1, 1.4])
     target = c1.radio("Target", TARGETS, horizontal=True, key="p2_target"); freq2 = c2.radio("Measure", ["MoM", "YoY"], horizontal=True, key="p2_freq", help="Month on month or year on year.")
     fcol, acol = ("forecast", "actual") if freq2 == "MoM" else ("forecast_yoy", "actual_yoy")
-    with c3.popover("Uncertainty settings", icon="🎚️"):
+    with c3.popover("Uncertainty settings"):
         unc_opts = sorted(oos.model.unique()); unc_default = next((m for m in (SELECTED, "Ridge") if m in unc_opts), unc_opts[0])
         unc_model = st.selectbox("Intervals use the past errors of", unc_opts, index=unc_opts.index(unc_default), key="p2_unc")
         level = st.select_slider("Interval width", options=[80, 90, 95], value=90, key="p2_level", format_func=lambda v: f"{v}%")
@@ -431,8 +403,14 @@ elif page.startswith("2"):
     def errors(tg, freq, model=None):
         g = oos[(oos.target == tg) & (oos.model == (model or unc_model))]
         return (g.actual - g.forecast).dropna() if freq == "MoM" else (g.actual_yoy - g.forecast_yoy).dropna()
-    tab_now, tab_hist, tab_drv, tab_fsbi = st.tabs(["🎯 Live forecast", "📉 Track record", "🧩 What drives it", "🔗 FSBI vs inflation"])
+    selection(Target=target, Measure="Month on month" if freq2 == "MoM" else "Year on year", Forecast_month=f"{LIVE_M:%b %Y}", Intervals=f"{level}% from past errors of {unc_model}", Period=f"{t0:%b %Y} to {t1:%b %Y}")
+    tab_now, tab_hist, tab_drv, tab_fsbi = st.tabs(["Live forecast", "Track record", "Feature importance", "FSBI vs inflation"])
     with tab_now:
+        if SCHED:
+            with st.expander("Release calendar", expanded=True):
+                rr = release_rows()
+                st.dataframe(rr[["Release", "For", "Date", "Days left", "When"]], hide_index=True, key="release_table", **WIDE,
+                             column_config={"Release": st.column_config.TextColumn(width="medium"), "Days left": st.column_config.NumberColumn(format="%d", width="small"), "When": st.column_config.TextColumn(width="large")})
         if len(CUR):
             cols = st.columns(len(CUR))
             for c, (_, r) in zip(cols, CUR.iterrows()):
@@ -580,34 +558,58 @@ elif page.startswith("2"):
 
 # ================================================================== 3. trading strategies
 elif page.startswith("3"):
-    header("Trading strategies", "Every strategy built on FSBI, ranked with the same costs and the same tests. Pick one below to see how it works and try variations.")
+    header("Trading results", "FSBI strategies by family, on one set of costs and significance tests, with a drill-down for each strategy.")
     T, TR, LBD, WRET = D["strat"], D["trades"], D["lb"], D["wret"]
     if T.empty:
         empty_note("No strategies in this export."); st.stop()
     if len(LBD):
         LBD = LBD.assign(Verdict=LBD.apply(verdict, axis=1))
-        n_sig = int((LBD["Holm p"] < 0.10).sum()); n_prom = int((LBD.Verdict == "🟡 Promising").sum())
+        n_sig = int((LBD["Holm p"] < 0.10).sum()); n_prom = int((LBD.Verdict == "Promising").sum())
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Strategies tested", len(LBD)); m2.metric("Significant after correction", n_sig, help="Holm-adjusted p below 0.10.")
         m3.metric("Promising (raw p < 0.10)", n_prom); m4.metric("Best design-period Sharpe", f"{LBD.Sharpe.max():.2f}")
+        st.subheader("Family comparison")
+        FA = LBD.groupby("family").agg(strategies=("strategy", "size"), median_sharpe=("Sharpe", "median"), best_sharpe=("Sharpe", "max"), promising=("Verdict", lambda v: int(v.isin(["Promising", "Significant"]).sum())),
+                                       best=("strategy", lambda x: x.loc[LBD.loc[x.index, "Sharpe"].idxmax()])).reset_index()
+        if "Sharpe (holdout)" in LBD:
+            FA["live_sharpe"] = FA.family.map(LBD.groupby("family")["Sharpe (holdout)"].median())
+        c1, c2 = st.columns([1, 1.15])
+        fl = FA.melt(id_vars="family", value_vars=["median_sharpe", "best_sharpe"], var_name="stat", value_name="Sharpe").replace({"median_sharpe": "Median strategy", "best_sharpe": "Best strategy"})
+        show(px.bar(fl.iloc[::-1], x="Sharpe", y="family", color="stat", orientation="h", barmode="group", color_discrete_map={"Median strategy": NAVY, "Best strategy": ORANGE}, title="Design-period Sharpe by family").add_vline(x=0, line_color=INK),
+             c1, height=150 + 34 * len(FA), yaxis_title="")
+        Tm = T[(T.date >= t0) & (T.date <= t1 + pd.offsets.MonthEnd(1))].groupby(["family", "date"], as_index=False).ret.mean().sort_values("date")
+        if len(Tm):
+            Tm["growth"] = Tm.groupby("family").ret.transform(lambda r: (1 + r).cumprod())
+            st0 = Tm.groupby("family", as_index=False).date.min().assign(date=lambda x: x.date - pd.offsets.MonthBegin(1), ret=0.0, growth=1.0)
+            Tm = pd.concat([st0, Tm], ignore_index=True).sort_values(["family", "date"])
+            show(shade_live(time_axes(px.line(Tm, x="date", y="growth", color="family", title="Growth of $1: equal-weight average of each family's strategies")).add_hline(y=1, line_color=GREY), Tm.date.max()), c2, height=150 + 34 * len(FA), yaxis_title="log scale", yaxis_type="log",
+                 legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.01, font=dict(size=10)))
+        st.dataframe(FA, hide_index=True, **WIDE, column_config={"family": st.column_config.TextColumn("Family", width="medium"), "strategies": st.column_config.NumberColumn("Strategies"),
+                     "median_sharpe": st.column_config.NumberColumn("Median Sharpe", format="%.2f"), "best_sharpe": st.column_config.NumberColumn("Best Sharpe", format="%.2f"), "promising": st.column_config.NumberColumn("Promising or better"),
+                     "live_sharpe": st.column_config.NumberColumn("Median live Sharpe", format="%.2f", help=f"Since {DESIGN_END:%b %Y}."), "best": st.column_config.TextColumn("Best strategy", width="large")})
+        with st.expander("What each family trades"):
+            for f_, txt in meta.get("family_about", {}).items():
+                st.markdown(f"**{f_}** {txt}")
         st.subheader("Leaderboard")
         c1, c3, c4 = st.columns([1.2, 1.2, 1.4])
         RANK_LABEL = {"Sharpe": "Sharpe ratio", "Sortino": "Sortino ratio", "Calmar": "Calmar ratio", "ann. return (%)": "Return per year", "max DD (%)": "Max drawdown (smallest first)",
-                      "profit factor": "Profit factor", "trade win rate": "Win rate"}
+                      "profit factor": "Profit factor", "trade win rate": "Win rate", "Jensen's alpha (ann. %)": "Jensen's alpha (CAPM)", "two-factor alpha (ann. %)": "Two-factor alpha (SPY + IEF)", "appraisal ratio": "Appraisal ratio"}
         rank_opts = [RANK_LABEL[m] for m in RANK_LABEL if m in LBD]           # friendly labels as the options themselves
         rank_by = {v: k for k, v in RANK_LABEL.items()}[c1.selectbox("Rank by", rank_opts, key="lb_rank")]
         fams_all = sorted(LBD.family.dropna().unique())
-        fam_sel = st.pills("Families (click to include or exclude)", fams_all, selection_mode="multi", default=fams_all, key="lb_src") if hasattr(st, "pills") else st.multiselect("Families", fams_all, default=fams_all, key="lb_src")
+        fam_sel = st.pills("Families", fams_all, selection_mode="multi", default=fams_all, key="lb_src") if hasattr(st, "pills") else st.multiselect("Families", fams_all, default=fams_all, key="lb_src")
         sig_only = c3.checkbox("Significant only", value=False, key="lb_sig", help="Only strategies whose Holm-adjusted p-value is below 0.10.")
         topn = c4.slider("Show top", 3, max(4, min(45, len(LBD))), min(12, len(LBD)), key="lb_n")
         L = LBD[LBD.family.isin(fam_sel or fams_all)]
         if sig_only:
             L = L[L["Holm p"] < 0.10]
         L = L.dropna(subset=[rank_by]).sort_values(rank_by, ascending=False).head(topn).reset_index(drop=True)
+        selection(Families=f"all {len(fams_all)}" if len(fam_sel or fams_all) == len(fams_all) else short_list([f.split(".")[0] for f in fam_sel], 12), Ranked_by=RANK_LABEL[rank_by], Filter="significant only" if sig_only else "all verdicts", Rows=f"top {len(L)}",
+                  Statistics=f"design period, before {DESIGN_END:%b %Y}")
         if len(L):
             all_cols = st.toggle("Show every statistic", value=False, key="lb_all")
             base_cols = ["strategy", "Verdict", "Sharpe", "ann. return (%)", "max DD (%)", "trade win rate", "Holm p", "Sharpe (holdout)"]
-            extra_cols = ["family", "trades", "Sortino", "Calmar", "profit factor", "bootstrap p", "reality-check p", "placebo p", "Sharpe, 1-day delay", "beta to SPY", "months (holdout)"]
+            extra_cols = ["family", "trades", "Sortino", "Calmar", "profit factor", "bootstrap p", "reality-check p", "placebo p", "Sharpe, 1-day delay", "beta to SPY", "months (holdout)", "primary", "Holm p (primary)", "Jensen's alpha (ann. %)", "Jensen's alpha t", "Jensen's alpha Holm p", "CAPM beta", "appraisal ratio", "two-factor alpha (ann. %)", "two-factor alpha t", "bond beta", "market-adjusted return (ann. %)", "Jensen's alpha (holdout, ann. %)"]
             tb = L[[c for c in base_cols + (extra_cols if all_cols else []) if c in L]].copy(); tb.insert(0, "#", range(1, len(tb) + 1))
             if "trade win rate" in tb:
                 tb["trade win rate"] = 100 * tb["trade win rate"]
@@ -620,9 +622,9 @@ elif page.startswith("3"):
                     "Sortino": st.column_config.NumberColumn(format="%.2f"), "Calmar": st.column_config.NumberColumn(format="%.2f"), "profit factor": st.column_config.NumberColumn("Profit factor", format="%.2f"),
                     "beta to SPY": st.column_config.NumberColumn("Beta to SPY", format="%.2f")}
             ev = st.dataframe(tb, hide_index=True, on_select="rerun", selection_mode="single-row", key="lb_table", column_config=ccfg, height=min(36 * len(tb) + 40, 560), **WIDE)
-            with st.expander("Chart view", icon="📊"):
+            with st.expander("Chart view"):
                 bar = L.iloc[::-1].assign(label=[f"{n[:60]}" for n in L.iloc[::-1].strategy])
-                fig = px.bar(bar, x=rank_by, y="label", orientation="h", color="Verdict", color_discrete_map={"✅ Significant": GREEN, "🟡 Promising": AMBER, "⚪ Inconclusive": GREY, "🔻 Negative": RED},
+                fig = px.bar(bar, x=rank_by, y="label", orientation="h", color="Verdict", color_discrete_map={"Significant": GREEN, "Promising": AMBER, "Inconclusive": GREY, "Negative": RED},
                              title=f"Top {len(L)} by {RANK_LABEL[rank_by].lower()}")
                 show(fig, height=max(330, 30 * len(L) + 140), yaxis_title="", xaxis_title=RANK_LABEL[rank_by])
             rows_sel = list(getattr(getattr(ev, "selection", None), "rows", []) or [])
@@ -631,9 +633,9 @@ elif page.startswith("3"):
                 if len(fam_c):
                     st.session_state["p3_family"], st.session_state["p3_strategy"] = fam_c.iloc[0], chosen
                 st.session_state["lb_applied"] = chosen
-            st.caption(f"👆 Click a row to open that strategy below. Statistics cover the design period (before {DESIGN_END:%b %Y}); 'Live Sharpe' is the record since then.")
-            how_to_read("**Verdicts.** ✅ *Significant*: survives the Holm correction for the number of strategies tried. 🟡 *Promising*: positive with a raw p-value below 0.10, but not after the correction. "
-                        "⚪ *Inconclusive*: positive but indistinguishable from luck. 🔻 *Negative*: lost money in the design period.\n\n"
+            st.caption(f"Statistics cover the design period (before {DESIGN_END:%b %Y}); Live Sharpe is the record since. Select a row for detail.")
+            how_to_read("**Verdicts.** *Significant*: survives the Holm correction for the number of strategies tried. *Promising*: positive with a raw p-value below 0.10, but not after the correction. "
+                        "*Inconclusive*: positive but indistinguishable from luck. *Negative*: lost money in the design period.\n\n"
                         "**Extra tests** (toggle *Show every statistic*): the *reality-check p* asks how often the best strategy on a board with no real edge would look this good; the *placebo p* shuffles the signal "
                         "to check that the signal, not the instruments, earned the return; *Sharpe if 1 day late* tests sensitivity to execution timing.\n\n"
                         "**Research basis by family:** " + "; ".join(f"{k}: {v}" for k, v in meta.get("references", {}).items()))
@@ -661,7 +663,25 @@ elif page.startswith("3"):
                     if has(D[key]):
                         st.markdown(f"**{title}**"); st.dataframe(D[key].round(3), hide_index=True, **WIDE)
     st.divider()
-    st.subheader("Strategy detail")
+    if has(D["fi_grid"]):
+        with st.expander("Fixed income prototype grid (notebook 4.L)"):
+            fg = D["fi_grid"]; gp = fg.pivot_table(index="pair", columns="signal type", values="Sharpe", aggfunc="first")
+            c1, c2 = st.columns([1, 1.2])
+            show(px.imshow(gp, color_continuous_scale="RdBu_r", zmin=-2, zmax=2, aspect="auto", text_auto=".2f", labels={"x": "", "y": "", "color": "Sharpe"}), c1, height=160 + 24 * len(gp), title="Annualised Sharpe by pair and signal type (gross, design period)")
+            c2.dataframe(fg.sort_values("Sharpe", ascending=False).round(3), hide_index=True, **WIDE)
+            ind_ = ~fg["signal type"].str.startswith("C")
+            c2.caption(f"{int(ind_.sum())} independent backtests (type C is type A reversed, shown for reference); {int((fg.p[ind_] < 0.10).sum())} at raw p < 0.10, {int((fg['Holm p'] < 0.10).sum())} after the Holm adjustment. "
+                       "Pairs are not duration-matched; the registered family L strategies are.")
+    if has(D["reversals"]) and "reversed Sharpe" in D["reversals"]:
+        with st.expander(f"Reversal analysis: {len(D['reversals'])} strategies with a strongly negative Sharpe"):
+            rv = D["reversals"]
+            st.dataframe(rv.drop(columns=["why"], errors="ignore"), hide_index=True, **WIDE, column_config={"strategy": st.column_config.TextColumn("Strategy", width="large"), "diagnosis": st.column_config.TextColumn("Diagnosis", width="large"),
+                         **{c: st.column_config.NumberColumn(format="%.2f") for c in rv.columns if c not in ("strategy", "family", "diagnosis", "why", "holds live", "months (live)")}})
+            for _, r in rv[rv.diagnosis.astype(str).str.startswith("opposite")].iterrows():
+                st.markdown(f"**{r.strategy}**: reversed Sharpe {r['reversed Sharpe']:.2f}, live {r['reversed Sharpe (live)']:.2f} ({'holds' if r['holds live'] else 'does not hold'} in the live period). {r.get('why', '')}")
+            st.caption("Each loser is rerun with positions reversed, costs still paid. Drift: the loss came from the average position, not from timing. Opposite sign: the instrument moved against the signal. "
+                       "A reversal chosen after the fact is data-mined; it counts only if it also holds in the live period.")
+    st.subheader("Strategy drill-down")
     c1, c2 = st.columns([1, 2.2])
     fams = sorted(T.family.unique())
     if st.session_state.get("p3_family") not in fams:
@@ -687,12 +707,13 @@ elif page.startswith("3"):
             c.metric(k, v, help=hlp)
         if len(LBD) and (LBD.strategy == strat).any():
             lr = LBD[LBD.strategy == strat].iloc[0]; rank_ = int((LBD.Sharpe > lr.Sharpe).sum()) + 1
-            plain = {"✅ Significant": "its result is unlikely to be luck even after allowing for every strategy tried.",
-                     "🟡 Promising": "its result looks real on its own, but not after allowing for every strategy tried.",
-                     "⚪ Inconclusive": "it made money, but no more than luck would explain.", "🔻 Negative": "it lost money in the design period."}[lr.Verdict]
+            plain = {"Significant": "its result is unlikely to be luck even after allowing for every strategy tried.",
+                     "Promising": "its result looks real on its own, but not after allowing for every strategy tried.",
+                     "Inconclusive": "it made money, but no more than luck would explain.", "Negative": "it lost money in the design period."}[lr.Verdict]
             live = f" Since {DESIGN_END:%b %Y} (live) its Sharpe is {lr['Sharpe (holdout)']:.2f}." if "Sharpe (holdout)" in lr and pd.notna(lr["Sharpe (holdout)"]) else ""
-            st.info(f"**{lr.Verdict}** · rank {rank_} of {len(LBD)} by Sharpe ({lr.Sharpe:.2f}, {int(lr.trades)} trades, adjusted p = {lr['Holm p']:.3f}): {plain}{live}", icon="🧾")
-    tab_bt, tab_lab, tab_proj = st.tabs(["📈 Backtest", "🧪 Try variations", "🔮 Projection"])
+            st.info(f"**{lr.Verdict}** · rank {rank_} of {len(LBD)} by Sharpe ({lr.Sharpe:.2f}, {int(lr.trades)} trades, adjusted p = {lr['Holm p']:.3f}): {plain}{live}")
+    selection(Family=fam, Strategy=strat.split(". ", 1)[0] if ". " in strat[:5] else strat[:30], Charts=f"{t0:%b %Y} to {t1:%b %Y}", Position=f"${POSITION:,.0f}")
+    tab_bt, tab_lab, tab_proj = st.tabs(["Backtest", "Signal thresholds", "Monte Carlo projection"])
     lab = {"ret": None, "pos": None, "now_pos": None, "now_text": None, "bench": None, "pos_label": None}
     base = TR[TR.strategy == strat].set_index("date").ret.sort_index() if has(TR) else pd.Series(dtype=float)
     with tab_bt:
@@ -823,15 +844,17 @@ elif page.startswith("3"):
 
 # ================================================================== 4. economic signals
 elif page.startswith("4"):
-    header("Economic signals", "Beyond inflation: what FSBI says about activity, jobs, credit, states and small-cap stocks, and how far ahead.")
+    header("FSBI correlations", "FSBI against macro series, official sector and state data, CPI components and market assets, at leads and lags.")
+    SIG, WRET = D["sig"], D["wret"]; COST = float(meta.get("cost_per_side", 0.0005))
     def ratio_chart(tab, title, where=st):
         t_ = tab.dropna(subset=["ratio"]).sort_values("ratio", ascending=False)
         if len(t_):
             col = np.where((t_.ratio < 1) & (t_["CW p"] < 0.10), "more accurate (significant)", np.where(t_.ratio < 1, "more accurate", "no improvement"))
             show(px.bar(t_, x="ratio", y="target", orientation="h", color=col, color_discrete_map={"more accurate (significant)": GREEN, "more accurate": "#9fd8c5", "no improvement": GREY},
                         title=title, labels={"ratio": "error with FSBI ÷ error without", "target": ""}).add_vline(x=1, line_dash="dash", line_color=INK), where, height=140 + 30 * len(t_))
-    N, S, P, MP, LD, LP, IC = D["econ_nat"], D["econ_sec"], D["econ_state"], D["econ_map"], D["leads"], D["lead_prof"], D["sc_ic"]
-    tabs = st.tabs(["🧭 Leading indicators", "📦 Nowcasting activity", "🛒 Retail sales by store type", "🗺️ States", "🏢 Small-cap stocks", "🧾 CPI components and regions"])
+    N, S, P, MP, LD, LP, IC, MR, EVT, MI = D["econ_nat"], D["econ_sec"], D["econ_state"], D["econ_map"], D["leads"], D["lead_prof"], D["sc_ic"], D["macro_reads"], D["event"], D["macro_ind"]
+    selection(Period=f"{t0:%b %Y} to {t1:%b %Y}", Latest_FSBI_month=f"{LIVE_M:%b %Y}", Tests=f"design period, before {DESIGN_END:%b %Y}")
+    tabs = st.tabs(["Macro series: leads and lags", "Market assets", "Retail sales by store type", "States", "Small-cap sectors", "CPI components and regions", "Composite indicators", "Nowcast gains", "Release-day reaction"])
     with tabs[0]:
         if has(LD):
             measures = list(dict.fromkeys(LD["FSBI measure"]))
@@ -856,7 +879,7 @@ elif page.startswith("4"):
                         "out-of-sample tests are on the *Nowcasting* tabs.")
         else:
             empty_note("No leading-indicator scan in this export (notebook section 3.9).")
-    with tabs[1]:
+    with tabs[7]:
         if has(N):
             c1, c2 = st.columns([1.2, 1]); ratio_chart(N, "Does adding FSBI make the forecast more accurate?", c1)
             c2.dataframe(N.round(3), hide_index=True, **WIDE)
@@ -900,131 +923,63 @@ elif page.startswith("4"):
             if has(D[key]):
                 st.markdown(f"**{title}**"); t_ = D[key].rename(columns={D[key].columns[0]: "target"})
                 c1, c2 = st.columns([1.2, 1]); ratio_chart(t_, "Error with FSBI ÷ error without", c1); c2.dataframe(t_.round(3), hide_index=True, **WIDE)
-
-# ================================================================== 5. signal lab
-elif page.startswith("5"):
-    header("Signal lab", "Build your own test: any FSBI signal against any instrument, simulate the CPI-release trade, or explore the sector rotations month by month.")
-    SIG, WRET, XS = D["sig"], D["wret"], D["xs"]
-    with st.expander("Trading assumptions", icon="⚙️", expanded=False):
-        c1, c2 = st.columns(2)
-        COST = c1.number_input("Trading cost per side (bp)", value=float(1e4 * meta.get("cost_per_side", 0.0005)), step=1.0, min_value=0.0, key="cost_bp") / 1e4
-        THRESH = c2.slider("Release trades: minimum predicted surprise (pp)", 0.0, 0.30, float(meta.get("deadband", 0.01)), 0.01, key="thresh")
-    if SIG.empty or WRET.empty:
-        empty_note("No signals or returns in this export."); st.stop()
-    st.warning("Every combination you try here is another test. Treat a good-looking result as a hypothesis to check on the live period, not a finding.", icon="⚠️")
-    tab_lab, tab_rel, tab_xs, tab_acc = st.tabs(["🧪 Any signal, any asset", "📅 CPI release trade", "🔀 Sector rotation explorer", "🎯 Value of accuracy"])
-    with tab_lab:
-        sig_names = [c for c in SIG.columns if c != "date"]; tickers = sorted(WRET.ticker.unique())
-        c1, c2, c3, c4 = st.columns([2.2, 1.6, 1, 1])
-        s_name = c1.selectbox("Signal", sig_names, key="lab_signal"); window = c2.selectbox("Holding period", list(WRET.window.unique()), key="lab_window")
-        long = c3.selectbox("Buy", tickers, index=tickers.index("XLY") if "XLY" in tickers else 0, key="lab_long", format_func=asset_name)
-        short = c4.selectbox("Against (sell)", ["(none)"] + tickers, index=(tickers.index("XLP") + 1) if "XLP" in tickers else 0, key="lab_short", format_func=lambda a: a if a == "(none)" else asset_name(a))
-        s_all = SIG.set_index("date")[s_name].dropna(); W = piv(WRET[WRET.window == window], "date", "ticker", "ret")
-        c1, c2, c3 = st.columns(3)
-        thr = c1.slider("Only trade when the signal is stronger than", 0.0, float(max(0.02, round(s_all.abs().quantile(0.9), 2))), 0.0, 0.01, key="lab_thr")
-        direction = c2.radio("Direction", ["Follow the signal", "Fade the signal"], horizontal=True, key="lab_dir"); sizing = c3.radio("Position size", ["Sign (+1 / -1)", "Proportional (capped at 2 sd)"], horizontal=True, key="lab_size")
-        u = ((W[long] - W[short]) / 2 if short != "(none)" and short in W else W[long]) if long in W else pd.Series(dtype=float)
-        d = pd.concat([s_all.rename("signal"), u.rename("unit")], axis=1).dropna(); d = d[(d.index >= t0) & (d.index <= t1)]
-        if len(d) < 6:
-            empty_note("Fewer than six months with both the signal and the return.")
+    with tabs[6]:
+        if has(MR):
+            if has(MI):
+                mi = MI.copy(); mi["date"] = pd.to_datetime(mi["date"]); mi = mi[(mi.date >= t0) & (mi.date <= t1)]
+                isel = st.selectbox("Indicator", [c for c in mi.columns if c != "date"], key="macro_ind")
+                show(time_axes(px.line(mi, x="date", y=isel, title=isel, color_discrete_sequence=[ORANGE]).add_hline(y=float(mi[isel].mean()), line_dash="dot", line_color=GREY)), height=300, yaxis_title="")
+            mr = MR.assign(col=MR.target + " | " + MR.horizon); tt = mr.pivot_table(index="FSBI indicator", columns="col", values="t-stat", aggfunc="first")
+            tt.index = [i.split(" (")[0] for i in tt.index]
+            show(px.imshow(tt, color_continuous_scale="RdBu_r", zmin=-4, zmax=4, aspect="auto", text_auto=".1f", labels={"x": "", "y": "", "color": "t"}), height=260 + 40 * len(tt),
+                 title="t-statistic of each indicator as a predictor of the target (Newey-West)", xaxis_tickangle=-35)
+            st.dataframe(MR.sort_values("p").round(3), hide_index=True, **WIDE)
+            how_to_read("Four indicators built from the sector-by-state panel (spending mix, cross-state dispersion, ticket minus transaction growth, sales acceleration), each measured against its own previous six months and tested as a predictor of the next one and three months of "
+                        "six macro series (controlling for the target's current value) and of three market spreads over the following FSBI-to-FSBI window. Holm p adjusts for every test in the table; shift p is the share of circular shifts of the indicator that do as well, a check that does not rely on the standard errors. Design period only.")
         else:
-            pos = (np.sign(d.signal) if sizing.startswith("Sign") else (d.signal / d.signal.std()).clip(-2, 2) / 2).where(d.signal.abs() > thr, 0.0) * (1 if direction.startswith("Follow") else -1)
-            r = pos * d.unit - 2 * COST * pos.abs(); tr = r[pos != 0]; mm = metrics(r)
-            cs = st.columns(6)
-            for c, (k, v) in zip(cs, [("Trades", f"{int((pos != 0).sum())}"), ("Average per trade", f"{1e4 * tr.mean():+.1f} bp" if len(tr) else "–"), ("Win rate", f"{(tr > 0).mean():.0%}" if len(tr) else "–"),
-                                      ("t-statistic", f"{tr.mean() / tr.std() * np.sqrt(len(tr)):.2f}" if len(tr) > 2 and tr.std() > 0 else "–"), ("Sharpe", fnum(mm.get("Sharpe"))), ("Signal-return correlation", f"{d.signal.corr(d.unit):+.2f}")]):
-                c.metric(k, v)
-            c1, c2 = st.columns(2)
-            show(time_axes(px.line(((1 + r).cumprod() - 1) * POSITION, labels={"value": "$"}, title=f"Cumulative P&L on ${POSITION:,.0f}", color_discrete_sequence=[ORANGE])).update_traces(showlegend=False), c1, height=360)
-            fig = px.scatter(d.assign(ret=100 * d.unit), x="signal", y="ret", color_discrete_sequence=[NAVY]); b = np.polyfit(d.signal, 100 * d.unit, 1); xs_ = np.linspace(d.signal.min(), d.signal.max(), 20)
-            fig.add_scatter(x=xs_, y=b[0] * xs_ + b[1], mode="lines", line=dict(color=ORANGE, dash="dash"))
-            show(fig, c2, height=360, title="Signal vs the return that followed", xaxis_title=s_name, yaxis_title="return over the holding period (%)", showlegend=False)
-            q = pd.qcut(d.signal, 3, labels=["weak signal", "middle", "strong signal"], duplicates="drop")
-            st.dataframe((100 * d.unit).groupby(q, observed=True).agg(["count", "mean", "median", "std"]).round(2).rename(columns={"count": "months", "mean": "average return (%)", "median": "median (%)", "std": "spread (sd, %)"}), **WIDE)
-    with tab_rel:
-        st.caption("Trades the predicted inflation surprise from the close before the release to the release-day close. 'Actual surprise' uses the print itself: the best any forecast could do, not an achievable result.")
-        legs_all = {k: v for k, v in meta.get("announcement_legs", {}).items() if not k.startswith("Basket")}
-        c0, c1, c2 = st.columns([1, 1.4, 2])
-        tg = c0.radio("Target", [t for t in TARGETS if f"{t}: predicted surprise, with FSBI (pp)" in SIG], key="rel_target")
-        source = c1.radio("Signal", ["Model with FSBI", "Model without FSBI", "Actual surprise (look-ahead upper bound)"], key="rel_source")
-        leg_pick = c2.multiselect("Trades (taken as shown if inflation is predicted HOT, reversed if COOL)", list(legs_all), default=list(legs_all), key="rel_legs")
-        col = {"Model with FSBI": f"{tg}: predicted surprise, with FSBI (pp)", "Model without FSBI": f"{tg}: predicted surprise, no FSBI (pp)", "Actual surprise (look-ahead upper bound)": f"{tg}: actual surprise, look-ahead (pp)"}[source]
-        window = f"Day before {tg} to {tg} release"; W = piv(WRET[WRET.window == window], "date", "ticker", "ret")
-        book = {}
-        for lg in leg_pick:
-            for a, w in legs_all[lg].items():
-                book[a] = book.get(a, 0.0) + w / len(leg_pick)
-        if col not in SIG or not book or not set(book) <= set(W.columns):
-            empty_note("Signal or returns not available for this selection.")
+            empty_note("No composite-indicator tests in this export (notebook section 3.10).")
+    with tabs[8]:
+        if has(EVT):
+            c1, c2 = st.columns([1, 1.3])
+            ev_ = EVT.sort_values("ratio")
+            show(px.bar(ev_, x="ratio", y="asset", orientation="h", title="Release-day volatility relative to other days", color_discrete_sequence=[ORANGE], labels={"ratio": "mean absolute move, release day / other days", "asset": ""}).add_vline(x=1, line_dash="dash", line_color=INK), c1, height=150 + 34 * len(ev_))
+            c2.dataframe(EVT.round(2), hide_index=True, **WIDE)
+            st.caption("Same-day price move regressed on the FSBI transaction-growth surprise. No reaction and a ratio near 1 indicate the release is not yet treated as market news.")
         else:
-            s = SIG.set_index("date")[col].dropna(); s = s[(s.index >= t0) & (s.index <= t1)]
-            unit = (W[list(book)] * pd.Series(book)).sum(axis=1, min_count=len(book)); d = pd.concat([s.rename("s"), unit.rename("u")], axis=1).dropna()
-            pos = np.sign(d.s).where(d.s.abs() > THRESH, 0.0); pnl = (pos * d.u - 2 * COST * sum(abs(v) for v in book.values()) * pos.abs()) * POSITION; tr = pnl[pos != 0]
-            cs = st.columns(6)
-            for c, (k, v) in zip(cs, [("Releases", f"{len(d)}"), ("Trades", f"{int((pos != 0).sum())}"), ("Hot / cool calls", f"{int((pos > 0).sum())} / {int((pos < 0).sum())}"), ("Total P&L", f"${pnl.sum():+,.0f}"),
-                                      ("Win rate", f"{(tr > 0).mean():.0%}" if len(tr) else "–"), ("Average per trade", f"${tr.mean():+,.0f}" if len(tr) else "–")]):
-                c.metric(k, v)
-            if len(d):
-                fig = go.Figure([go.Bar(x=d.index, y=pnl, name="P&L per release", marker_color=np.where(pnl >= 0, TEAL, RED)), go.Scatter(x=d.index, y=pnl.cumsum(), name="cumulative", line=dict(color=INK, width=2))])
-                show(time_axes(fig), height=400, title=f"{tg}: {source.lower()}, ${POSITION:,.0f} per trade", yaxis_title="$")
-                with st.expander("Release by release"):
-                    st.dataframe(pd.DataFrame({"predicted surprise (pp)": d.s, "call": pos.map({1.0: "HOT", -1.0: "COOL", 0.0: "no trade"}), "trade return (%)": 100 * d.u, "P&L ($)": pnl}).round(3), **WIDE)
-    with tab_xs:
-        if XS.empty:
-            empty_note("No sector rotation signals in this export.")
+            empty_note("No release-day study in this export (notebook section 3.10).")
+    with tabs[1]:
+        if SIG.empty or WRET.empty:
+            empty_note("No signals or returns in this export.")
         else:
-            c1, c2, c3 = st.columns([2.2, 1, 1])
-            name = c1.selectbox("Rotation strategy", list(XS.signal.unique()), key="xs_signal"); frac = c2.slider("Share held long and short", 0.1, 0.5, 0.33, 0.01, key="xs_frac")
-            S = piv(XS[XS.signal == name], "date", "asset", "value").sort_index(); R = piv(WRET[WRET.window == "FSBI day to next FSBI day"], "date", "ticker", "ret")
-            S = S[[c for c in S if c in R]]; mths = [d_ for d_ in S.index if d_ in R.index and S.loc[d_].notna().sum() >= 4 and t0 <= d_ <= t1]
-            if not mths:
-                empty_note("No month with at least four assets for this signal in the timeline.")
+            sig_names = [c for c in SIG.columns if c != "date"]; tickers = sorted(WRET.ticker.unique())
+            c1, c2, c3, c4 = st.columns([2.2, 1.6, 1, 1])
+            s_name = c1.selectbox("Signal", sig_names, key="lab_signal"); window = c2.selectbox("Holding period", list(WRET.window.unique()), key="lab_window")
+            long = c3.selectbox("Buy", tickers, index=tickers.index("XLY") if "XLY" in tickers else 0, key="lab_long", format_func=asset_name)
+            short = c4.selectbox("Against (sell)", ["(none)"] + tickers, index=(tickers.index("XLP") + 1) if "XLP" in tickers else 0, key="lab_short", format_func=lambda a: a if a == "(none)" else asset_name(a))
+            lag_m = st.slider("Lag: months between the FSBI signal and the trade", 0, 6, 0, key="lab_lag", help="0 = trade the window that opens when the signal is published; k = wait k further months.")
+            s_all = SIG.set_index("date")[s_name].dropna().shift(lag_m).dropna(); W = piv(WRET[WRET.window == window], "date", "ticker", "ret")
+            c1, c2, c3 = st.columns(3)
+            thr = c1.slider("Only trade when the signal is stronger than", 0.0, float(max(0.02, round(s_all.abs().quantile(0.9), 2))), 0.0, 0.01, key="lab_thr")
+            direction = c2.radio("Direction", ["Follow the signal", "Fade the signal"], horizontal=True, key="lab_dir"); sizing = c3.radio("Position size", ["Sign (+1 / -1)", "Proportional (capped at 2 sd)"], horizontal=True, key="lab_size")
+            u = ((W[long] - W[short]) / 2 if short != "(none)" and short in W else W[long]) if long in W else pd.Series(dtype=float)
+            d = pd.concat([s_all.rename("signal"), u.rename("unit")], axis=1).dropna(); d = d[(d.index >= t0) & (d.index <= t1)]
+            selection(Signal=s_name, Asset=asset_name(long) + (f" vs {asset_name(short)}" if short != "(none)" else ""), Holding=window, Lag=f"{lag_m} month{'s' if lag_m != 1 else ''}", Months=len(d))
+            lc = pd.Series({k: SIG.set_index("date")[s_name].shift(k).corr(u) for k in range(0, 7)}).dropna()
+            if len(lc):
+                show(px.bar(x=lc.index, y=lc.values, color_discrete_sequence=[NAVY], title="Correlation of the signal with the return, by lag"), height=240, xaxis_title="lag (months)", yaxis_title="correlation", xaxis_dtick=1)
+            if len(d) < 6:
+                empty_note("Fewer than six months with both the signal and the return.")
             else:
-                month = c3.select_slider("Month", options=[d_.strftime("%Y-%m") for d_ in mths], value=mths[-1].strftime("%Y-%m"), key=f"xs_month_{kid(name)}")
-                t = pd.Timestamp(month); w = xs_weights(S.loc[t], frac)
-                snap = pd.DataFrame({"signal": S.loc[t], "return (%)": 100 * R.loc[t].reindex(S.columns)}).dropna(subset=["signal"]).sort_values("signal")
-                snap["side"] = ["long" if w.get(a, 0) > 0 else "short" if w.get(a, 0) < 0 else "not held" for a in snap.index]; snap["asset"] = [asset_name(a) for a in snap.index]
-                cm = {"long": TEAL, "short": RED, "not held": "#d1d5db"}; c1, c2 = st.columns(2)
-                show(px.bar(snap, x="signal", y="asset", orientation="h", color="side", color_discrete_map=cm), c1, height=130 + 26 * len(snap), title=f"Ranking on FSBI day, {t:%b %Y}", yaxis_title="")
-                if snap["return (%)"].notna().any():
-                    show(px.bar(snap.dropna(subset=["return (%)"]), x="return (%)", y="asset", orientation="h", color="side", color_discrete_map=cm), c2, height=130 + 26 * len(snap), title="What happened by the next FSBI day (%)", yaxis_title="")
-                ls = pd.Series({d_: sum(R.at[d_, a] * x for a, x in xs_weights(S.loc[d_], frac).items() if pd.notna(R.at[d_, a])) - 2 * COST for d_ in mths})
-                icx = pd.Series({d_: S.loc[d_].corr(R.loc[d_].reindex(S.columns), method="spearman") for d_ in mths}); mm = metrics(ls); cs = st.columns(5)
-                for c, (k, v) in zip(cs, [("Months", f"{len(ls)}"), ("Average month", f"{1e4 * ls.mean():+.1f} bp"), ("Win rate", f"{(ls > 0).mean():.0%}"), ("Sharpe", fnum(mm.get("Sharpe"))), ("Average IC", f"{icx.mean():+.3f}")]):
+                pos = (np.sign(d.signal) if sizing.startswith("Sign") else (d.signal / d.signal.std()).clip(-2, 2) / 2).where(d.signal.abs() > thr, 0.0) * (1 if direction.startswith("Follow") else -1)
+                r = pos * d.unit - 2 * COST * pos.abs(); tr = r[pos != 0]; mm = metrics(r)
+                cs = st.columns(6)
+                for c, (k, v) in zip(cs, [("Trades", f"{int((pos != 0).sum())}"), ("Average per trade", f"{1e4 * tr.mean():+.1f} bp" if len(tr) else "–"), ("Win rate", f"{(tr > 0).mean():.0%}" if len(tr) else "–"),
+                                          ("t-statistic", f"{tr.mean() / tr.std() * np.sqrt(len(tr)):.2f}" if len(tr) > 2 and tr.std() > 0 else "–"), ("Sharpe", fnum(mm.get("Sharpe"))), ("Signal-return correlation", f"{d.signal.corr(d.unit):+.2f}")]):
                     c.metric(k, v)
-                show(time_axes(px.line(((1 + ls).cumprod() - 1) * POSITION, labels={"value": "$"}, title=f"Long-short cumulative P&L on ${POSITION:,.0f}", color_discrete_sequence=[ORANGE])).update_traces(showlegend=False), height=320)
-    with tab_acc:
-        sens = D["sens"]
-        if sens.empty:
-            empty_note("No sensitivity results in this export.")
-        else:
-            c1, c2 = st.columns(2); curve = sens[sens["noise sd"].notna()] if "noise sd" in sens else pd.DataFrame(); scn = sens[sens.scenario.notna()] if "scenario" in sens else pd.DataFrame()
-            if len(curve):
-                show(px.line(curve, x="noise sd", y="Sharpe", color="target", markers=True), c1, height=380, title="How fast the edge fades as forecasts get worse", xaxis_title="forecast error (sd of noise around the true print, pp)")
-            if len(scn):
-                show(px.bar(scn, x="target", y="Sharpe", color="scenario", barmode="group", color_discrete_sequence=[TEAL, GREY, ORANGE]), c2, height=380, title="If the forecast were biased by 0.1 pp", xaxis_title="")
-            st.caption("Left: the release trade rerun with the forecast replaced by the true print plus noise; zero noise is perfect foresight. Real forecasts share errors with the market, so they sit below this curve.")
-
-# ================================================================== 6. findings
-else:
-    header("Findings", "Where FSBI was put to work, what came out, and how strong the evidence is.")
-    sc = D["score"]
-    if has(sc):
-        sc = sc.copy(); sc["area"] = np.where(sc.iloc[:, 0].astype(str).str.startswith("3"), "🎯 Forecasting and economic signals", "📈 Trading")
-        cols = st.columns(2)
-        for col, (area, grp) in zip(cols, sc.groupby("area", sort=False)):
-            with col:
-                st.subheader(area); scorecard(grp.drop(columns="area"))
-        st.caption("🟢 at least one result passes a significance test · 🔵 descriptive only · ⚪ no significant result yet")
-    st.markdown(f"""
-#### How to read it
-- **Evidence** means an out-of-sample improvement, a multiple-testing-adjusted p-value or a placebo, never a raw correlation.
-- **Sample size.** About thirty out-of-sample forecast months and forty trading months: most intervals include "no effect". That is a statement about the sample, not about FSBI.
-- **Design vs live.** Models and strategies were chosen using months before {DESIGN_END:%B %Y}. Everything after that is a live track record that played no part in any choice; it grows with every new FSBI release.
-- **Benchmarks.** Cleveland nowcast {'loaded' if meta.get('nowcast_loaded') else 'NOT loaded (trailing-mean fallback)'}; Kalshi markets with data: {', '.join(meta.get('kalshi_markets', [])) or 'none'}.
-- **Costs.** ETF trades pay {1e4 * meta.get('cost_per_side', 0):.0f} bp per side in the notebook's results; the labs let you change it.
-- **R²** is 1 − SSE/SST throughout and can be negative. Comparisons of a model with and without FSBI use the Clark-West test.
-""")
-    if meta.get("mc_summary"):
-        with st.expander("Combined portfolio: Monte Carlo summary"):
-            st.dataframe(pd.Series(meta["mc_summary"], name="value").round(2).to_frame().T, **WIDE)
+                c1, c2 = st.columns(2)
+                show(time_axes(px.line(((1 + r).cumprod() - 1) * POSITION, labels={"value": "$"}, title=f"Cumulative P&L on ${POSITION:,.0f}", color_discrete_sequence=[ORANGE])).update_traces(showlegend=False), c1, height=360)
+                fig = px.scatter(d.assign(ret=100 * d.unit), x="signal", y="ret", color_discrete_sequence=[NAVY]); b = np.polyfit(d.signal, 100 * d.unit, 1); xs_ = np.linspace(d.signal.min(), d.signal.max(), 20)
+                fig.add_scatter(x=xs_, y=b[0] * xs_ + b[1], mode="lines", line=dict(color=ORANGE, dash="dash"))
+                show(fig, c2, height=360, title="Signal vs the return that followed", xaxis_title=s_name, yaxis_title="return over the holding period (%)", showlegend=False)
+                q = pd.qcut(d.signal, 3, labels=["weak signal", "middle", "strong signal"], duplicates="drop")
+                st.dataframe((100 * d.unit).groupby(q, observed=True).agg(["count", "mean", "median", "std"]).round(2).rename(columns={"count": "months", "mean": "average return (%)", "median": "median (%)", "std": "spread (sd, %)"}), **WIDE)
